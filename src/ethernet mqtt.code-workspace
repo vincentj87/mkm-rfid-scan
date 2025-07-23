@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"name": "ethernet mqtt",
+			"path": "../../ethernet mqtt"
+		},
+		{
+			"name": "foc test",
+			"path": "../../foc test"
+		},
+		{
+			"name": "Simple FOC test sensor",
+			"path": "../../Simple FOC test sensor"
+		},
+		{
+			"name": "MKM RFID Reader",
+			"path": ".."
+		},
+		{
+			"name": "ESP step dir control",
+			"path": "../../ESP step dir control"
+		}
+	],
+	"settings": {}
+}
