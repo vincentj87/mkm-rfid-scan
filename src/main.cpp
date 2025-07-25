@@ -10,10 +10,10 @@
 // === Ethernet Settings ===
 #define ETH_SPI_SCS 5  // W5500 CS
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
-IPAddress ip(172,19,16,62);
-IPAddress gateway(172,19,17,254);
-IPAddress subnet(255, 255, 254, 0);
-IPAddress mqttServer(172,17,210,59);
+IPAddress ip(172,19,16,105);
+IPAddress gateway(172,19,16,254);
+IPAddress subnet(255, 255,255,255);
+IPAddress mqttServer(172,19,16,102);
 #define MQTT_Port 1883
 #define MQTT_HearbeatDuration 1000
 unsigned long MQTT_nowT;
@@ -34,8 +34,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 }
 PubSubClient mqttClient(mqttServer,MQTT_Port,callback,ethClient);
-const char* mqtt_username ="";
-const char* mqtt_password = "";
+const char* mqtt_username ="admin";
+const char* mqtt_password = "admin";
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
@@ -52,7 +52,7 @@ void connectToMQTT(){
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println(" try again in 3 seconds");
       // ArduinoOTA.poll();
       delay(3000);
     }
@@ -77,7 +77,7 @@ void setup() {
   tft.setTextSize(2);
 
   tft.setCursor(10, 10);
-  tft.println("KKM PAIRING STATION");
+  tft.println("MKM PAIRING STATION");
 
   // === Ethernet INIT ===
   Ethernet.init(ETH_SPI_SCS);
@@ -121,9 +121,13 @@ void loop() {
   if(!mqttClient.connected()){
     connectToMQTT();
   }
-  ArduinoOTA.poll();
-  connectToMQTT();
-  heartBeatRoutine();
+  // ArduinoOTA.poll();
+  // connectToMQTT();
+  
+  if(mqttClient.connected()){
+    heartBeatRoutine();
+  }
+  
   bool btn1Pressed = digitalRead(BUTTON1_PIN) == LOW;
   bool btn2Pressed = digitalRead(BUTTON2_PIN) == LOW;
 
