@@ -6,7 +6,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include <PubSubClient.h>
-
+#include "UNIT_UHF_RFID.h"
 // === Ethernet Settings ===
 #define ETH_SPI_SCS 5  // W5500 CS
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
