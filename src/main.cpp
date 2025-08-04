@@ -1,4 +1,5 @@
 // https://github.com/vincentj87/mkm-io.git
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <Ethernet.h>
@@ -10,10 +11,17 @@
 // === Ethernet Settings ===
 #define ETH_SPI_SCS 5  // W5500 CS
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
-IPAddress ip(172,19,16,105);
-IPAddress gateway(172,19,16,254);
-IPAddress subnet(255, 255,255,255);
-IPAddress mqttServer(172,19,16,102);
+// === ONE SEGMENT WITH SERVER CONFIG IP ===
+// IPAddress ip(172,17,210,234);
+// IPAddress gateway(172,17,210,254);
+// IPAddress subnet(255, 255,255,0);
+// IPAddress mqttServer(172,17,210,59);
+
+// === ONE SEGMENT WITH SWITCH CONFIG IP ===
+IPAddress ip (172,19,16,65);
+IPAddress gateway (172,19,17,254);
+IPAddress subnet (255,255,254,0);
+IPAddress mqttServer (172,19,16,243);
 // === RFID Settings ===
 HardwareSerial SerialRFID(1);
 Unit_UHF_RFID uhf;
@@ -38,6 +46,12 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 // === Button Pins ===
 #define BUTTON1_PIN 36
 #define BUTTON2_PIN 39
+void callback(char* topic, byte* payload, unsigned int length);
+PubSubClient mqttClient(mqttServer,MQTT_Port,callback,ethClient);
+const char* mqtt_username ="admin";
+const char* mqtt_password = "admin";
+unsigned long nowT=0;
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -47,11 +61,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 }
-PubSubClient mqttClient(mqttServer,MQTT_Port,callback,ethClient);
-const char* mqtt_username ="admin";
-const char* mqtt_password = "admin";
 void rfidRead(){
   if((millis()-lastReadRFID)>100){
+    
    uint8_t result = uhf.pollingMultiple(20);
    if(result>0){
     for (uint8_t i = 0; i < result; i++) {
@@ -64,8 +76,21 @@ void rfidRead(){
    }
 
   }
+  String barcode="";
+
+  while(SerialRFID.available()){
+   uint8_t c= SerialRFID.read();
+
+  }
   lastReadRFID = millis();
   }
+}
+void dataUpdate(){
+  String rfidData = "";
+  String barcodeData = "";
+  rfidData= uhf.cards[0].epc_str;
+  barcodeData="";
+
 }
 void rfidShowTFT(){
   // Clear below text lines instead
@@ -85,7 +110,7 @@ void rfidSetup(){
     tft.fillRect(0, 130, 320, 30, ILI9341_BLACK); 
     tft.setCursor(10,130);
     tft.setTextColor(ILI9341_GREEN);
-    tft.print("RFID OK");
+    tft.print("RFID OTA OK");
     Serial.println("RFID Module initialized successfully.");
   } else {
     tft.fillRect(0, 130, 320, 40, ILI9341_BLACK); 
@@ -175,10 +200,12 @@ void setup() {
 void loop() {
   if(!mqttClient.connected()){
     connectToMQTT();
-    
+    rfidRead();
+    rfidShowTFT();
   }
-    
-  // ArduinoOTA.poll();
+  
+  
+  ArduinoOTA.poll();
   // connectToMQTT();
   
   if(mqttClient.connected()){
@@ -188,8 +215,7 @@ void loop() {
   bool btn1Pressed = digitalRead(BUTTON1_PIN) == LOW;
   bool btn2Pressed = digitalRead(BUTTON2_PIN) == LOW;
 
-  rfidRead();
-  rfidShowTFT();
+  
 
   mqttClient.loop();
   delay(100); // avoid flickering
