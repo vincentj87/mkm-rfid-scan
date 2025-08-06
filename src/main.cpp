@@ -430,7 +430,7 @@ void setup()
   Serial.println("Ota init");
   ArduinoOTA.begin(Ethernet.localIP(), "arduino", "password", InternalStorage);
  
-  // === QTT INIT ===
+  // === MQTT INIT ===
   Serial.println("MQTT Init");
   mqttClient.setServer(mqttServer, MQTT_Port);
   Serial.println("OTA Ready");
